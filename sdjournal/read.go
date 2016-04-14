@@ -188,6 +188,29 @@ process:
 	return
 }
 
+func (r *JournalReader) FollowAsync(until <-chan time.Time, recieve chan<- []byte) <-chan error {
+	errCh := make(chan error, 1)
+	go func() {
+		var msg = make([]byte, 64*1<<(10))
+		for {
+			c, err := r.Read(msg)
+			if err != nil && err != io.EOF {
+				errCh <- err
+			}
+			select {
+			case <-until:
+				errCh <- nil
+				return
+			default:
+				if c > 0 {
+					recieve <- msg[:c]
+				}
+			}
+		}
+	}()
+	return errCh
+}
+
 // buildMessage returns a string representing the current journal entry in a simple format which
 // includes the entry timestamp and MESSAGE field.
 func (r *JournalReader) buildMessage() (string, error) {
