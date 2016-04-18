@@ -188,6 +188,9 @@ process:
 	return
 }
 
+// FollowAsync asynchronously follows the JournalReader, writing each new journal entry to the provided receiving byte channel.
+// The follow will continue until a single time.Time is received on the until channel.
+// NOTE: The until channel, must be closed or this method will leak a Go routine
 func (r *JournalReader) FollowAsync(until <-chan time.Time, recieve chan<- []byte) <-chan error {
 	errCh := make(chan error, 1)
 	go func() {
