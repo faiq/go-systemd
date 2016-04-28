@@ -177,9 +177,7 @@ func (j *Journal) FlushMatches() {
 
 // Next advances the read pointer into the journal by one entry.
 func (j *Journal) Next() (int, error) {
-	j.mu.Lock()
 	r := C.sd_journal_next(j.cjournal)
-	j.mu.Unlock()
 
 	if r < 0 {
 		return int(r), fmt.Errorf("failed to iterate journal: %d", r)
